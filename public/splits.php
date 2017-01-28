@@ -6,6 +6,7 @@
     $end = date("Y-m-d", strtotime($_GET['enddate']));
     $league = $_GET['league'];
     $team = $_GET['team'];
+    $pa = $_GET['pa'];
   }
   else
   {
@@ -13,9 +14,10 @@
     $end = '2016-04-13';
     $league = 'ALL';
     $team = 'ALL';
+    $pa = 100;
   }
 
-  function getStats($start_date, $end_date, $league, $team)
+  function getStats($start_date, $end_date, $league, $team, $pa)
   {
     include("config.php");
 
@@ -37,6 +39,7 @@
       player.lastname, 
       player.position,
       league.name AS league,
+      class.name AS class,
       team.parent_team_abbrev AS team,
       (TIMESTAMPDIFF(DAY, player.dateofbirth, '$end_date') / 365) AS age,
       (TIMESTAMPDIFF(DAY, player.dateofbirth, '$end_date') / 365) - ages.age AS age_diff,
@@ -59,6 +62,7 @@
     INNER JOIN game ON player_game.game_id = game.id
     INNER JOIN team ON player_game.team_id = team.id
     INNER JOIN league ON team.league_id = league.id
+    INNER JOIN class ON league.class_id = class.id
     INNER JOIN ($sql_age) as ages ON ages.lid = league.id
     ";
 
@@ -74,7 +78,7 @@
 
     $sql_group = "
     GROUP BY player.id, team, player.lastname, player.firstname
-    HAVING SUM(batter_game.at_bats) > 50
+    HAVING SUM(batter_game.plate_appearances) >= $pa
     ";
 
     $sql_order = "
@@ -129,6 +133,7 @@
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/skeleton.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/jquery.loading-indicator.css">
     <title>MiLB Splits</title>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -141,18 +146,25 @@
     </script>
     <script type="text/javascript" src="js/jquery.tablesorter.js"></script> 
     <script type="text/javascript" src="js/jquery.freezeheader.js"></script> 
+    <script type="text/javascript" src="js/jquery.loading-indicator.js"></script> 
     <script>
     $(document).ready(function() 
       { 
         $("#myTable").tablesorter(); 
         $("#myTable").freezeHeader();
+        //$('body').loadingIndicator();
       } 
     );
+    </script>
+    <script type="text/javascript">
+      function showLoading() {
+        $('body').loadingIndicator();
+      }
     </script>
   </head>
   <body>
     <h1>MiLB Splits</h1>
-    <form action="" method="get">
+    <form id="myForm" action="" method="get" onsubmit="showLoading();">
       <fieldset data-role="controlgroup" data-type="horizontal">
       <label>Dates:</label>
       <?php
@@ -194,11 +206,26 @@
           }
         ?>
       </select>
+      <label>Min PA:</label>
+      <select name="pa">
+        <?php
+        $pa_array = array(50, 100, 150, 200, 250, 300, 350, 400, 450, 500);
+        foreach($pa_array as $pa_temp)
+        {
+          echo '<option';
+          if($pa == $pa_temp)
+            echo ' selected="selected"';
+          echo '>';
+          echo $pa_temp;
+          echo '</option>';
+        }
+        ?>
+      </select>
       <input type="submit" name="submit"/>
       </fieldset>
     </form>
     <?php
-      $result = getStats($start, $end, $league, $team);
+      $result = getStats($start, $end, $league, $team, $pa);
       /*
       if (isset($_GET['submit']))
       {
@@ -221,7 +248,7 @@
     ?>
     <table id="myTable" class="tablesorter">
       <colgroup>
-      <col span="6">
+      <col span="7">
       <col span="4" style="background-color: whitesmoke">
       <col span="3">
       <col span="3" style="background-color: whitesmoke">
@@ -229,9 +256,10 @@
       <thead>
         <tr class="header">
           <th>Name</th>
-          <th>Position</th>
+          <th>Pos</th>
+          <th>Class</th>
+          <th>Lg</th>
           <th>Team</th>
-          <th>League</th>
           <th>Age</th>
           <th>Age&Delta;</th>
           <th>PA</th>
@@ -262,8 +290,9 @@
               echo '<tr>';
               echo '<td>', $row['lastname'], ', ', $row['firstname'], '</td>';
               echo '<td>', $row['position'], '</td>';
-              echo '<td>', $row['team'], '</td>';
+              echo '<td>', $row['class'], '</td>';
               echo '<td>', $row['league'], '</td>';
+              echo '<td>', $row['team'], '</td>';
               echo '<td>', $age, '</td>';
               echo '<td>', $age_diff, '</td>';
               echo '<td>', $row['pa'], '</td>';
