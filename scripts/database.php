@@ -10,14 +10,14 @@ class Database
     //define('DB_PASSWORD', 'SWF0rge!');
     //define('DB_NAME', 'splits');
     //$this->db = mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
-    $this->db = mysqli_connect('localhost','root','SWF0rge!','splits');
+    $this->db = mysqli_connect('localhost','root','SWF0rge!','splits1');
   }
 
   public function insertGame($game)
   {
     //$insertdate = date("Y-m-d", strtotime($game->date));
     $insertdate = $game->date;
-    echo 'Game Date: ', $insertdate, PHP_EOL;
+    //echo 'Game Date: ', $insertdate, PHP_EOL;
     $away_db_id = $game->away_team->db_id;
     $home_db_id = $game->home_team->db_id;
     
@@ -52,7 +52,7 @@ class Database
   public function insertPlayer($p)
   {
     $insertdate = date("Y-m-d", strtotime($p->dob));
-    echo 'DOB: ', $insertdate, PHP_EOL;
+    //echo 'DOB: ', $insertdate, PHP_EOL;
     $fname = mysqli_real_escape_string($this->db, $p->first_name);
     $lname = mysqli_real_escape_string($this->db, $p->last_name);
 
@@ -205,7 +205,7 @@ class Database
       $row = mysqli_fetch_assoc($result);
       $age = $row['age'];
 
-      echo $league, ' = ', $age, PHP_EOL;
+      //echo $league, ' = ', $age, PHP_EOL;
 
       $sql = "
       UPDATE league 

@@ -2,10 +2,10 @@
  * Script
  */
 
-DROP DATABASE splits;
+DROP DATABASE splits1;
 
-CREATE DATABASE splits; 
-USE splits;
+CREATE DATABASE splits1; 
+USE splits1;
 
 CREATE TABLE class (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

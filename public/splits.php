@@ -19,7 +19,7 @@
 
   function getStats($start_date, $end_date, $league, $team, $pa)
   {
-    include("config.php");
+    include("../resources/config.php");
 
     $sql_age = "
     SELECT
@@ -77,7 +77,7 @@
       $sql_where .= " AND team.parent_team_abbrev = " . "'$team' ";
 
     $sql_group = "
-    GROUP BY player.id, team, player.lastname, player.firstname
+    GROUP BY player.id, league.id, team.id
     HAVING SUM(batter_game.plate_appearances) >= $pa
     ";
 
@@ -109,14 +109,14 @@
 
   function getLeagues()
   {
-    include("config.php");
+    include("../resources/config.php");
     $sql = "SELECT name FROM league ORDER BY name ASC";
     return mysqli_query($db,$sql);
   }
   
   function getTeams()
   {
-    include("config.php");
+    include("../resources/config.php");
     $sql = "SELECT DISTINCT parent_team_abbrev AS name FROM team ORDER BY name ASC";
     return mysqli_query($db,$sql);
   }
@@ -281,6 +281,8 @@
             while($row = mysqli_fetch_array($result)) {
               $age = number_format(round($row['age'], 1), 1);
               $age_diff = number_format(round($row['age_diff'], 1), 1);
+              if($age_diff >= 0)
+                $age_diff = '+' . $age_diff;
               $avg = ltrim(number_format(round($row['avg'], 3), 3), '0');
               $obp = ltrim(number_format(round($row['obp'], 3), 3), '0');
               $iso = ltrim(number_format(round($row['iso'], 3), 3), '0');
@@ -288,7 +290,7 @@
               $bb_pct = number_format(round($row['bb_pct'] * 100, 1), 1) . '%';
               $so_pct = number_format(round($row['so_pct'] * 100, 1), 1) . '%';
               echo '<tr>';
-              echo '<td>', $row['lastname'], ', ', $row['firstname'], '</td>';
+              echo '<td>', $row['lastname'], ', ', $row['firstname'], ' <a target="_blank" href="http://www.fangraphs.com/players.aspx?lastname=', $row['firstname'], ' ', $row['lastname'], '"> <img src="img/fangraphs.png"></a></td>';
               echo '<td>', $row['position'], '</td>';
               echo '<td>', $row['class'], '</td>';
               echo '<td>', $row['league'], '</td>';

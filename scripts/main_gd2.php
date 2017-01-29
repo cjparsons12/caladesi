@@ -7,6 +7,7 @@ class Game
   public $league;
   public $game_data_directory;
   public $date;
+  public $game_type;
   public $status;
   public $away_team;
   public $home_team;
@@ -21,6 +22,7 @@ class Game
     //  $this->date = date('Y-m-d', strtotime($resume_date));
     
     $this->game_data_directory = $game['game_data_directory'];
+    $this->game_type = $game['game_type'];
     $this->status = $game->status['status'];
     //echo $this->game_id, " ", $this->league, ' ', $this->game_data_directory, ' ', $this->status, PHP_EOL;
   }
@@ -214,7 +216,9 @@ class Gameday2Data
     foreach($gamesXml->game as $gameXml)
     {
       $game = new Game($gameXml);
-      if($game->status == 'Final' && $game->league != 'MEX')
+      if($game->status == 'Final' && 
+        $game->league != 'MEX' && 
+        $game->game_type == 'R')
       {
         echo 'Loading ', $game->external_game_id, '...', PHP_EOL;
 
@@ -233,9 +237,9 @@ class Gameday2Data
         $game->away_team->db_id = $away_team_id;
         $home_team_id = self::getTeamId($db, $game->home_team, $game->league);
         $game->home_team->db_id = $home_team_id;
-        echo 'Away: ', $game->away_team->team, '(', $game->away_team->db_id, ')';
-        echo 'Home: ', $game->home_team->team, '(', $game->home_team->db_id, ')';
-        echo PHP_EOL;
+        //echo 'Away: ', $game->away_team->team, '(', $game->away_team->db_id, ')';
+        //echo 'Home: ', $game->home_team->team, '(', $game->home_team->db_id, ')';
+        //echo PHP_EOL;
 
         $game_id = $db->insertGame($game); 
      
@@ -271,14 +275,14 @@ class Gameday2Data
             // add to database
             $player_id = $db->insertPlayer($player);
           }
-          echo "Player: ", $player_id, PHP_EOL;
+          //echo "Player: ", $player_id, PHP_EOL;
 
           if($playerStats->team->team_id == $game->away_team->team_id)
             $team_id = $away_team_id; 
           else
             $team_id = $home_team_id; 
 
-          echo "Team: ", $team_id, PHP_EOL;
+          //echo "Team: ", $team_id, PHP_EOL;
 
           $player_game_id = $db->insertPlayerGame($player_id, $game_id, $team_id);
 
@@ -374,6 +378,7 @@ function loadDays($start_date, $end_date)
 
 }
 
-//loadDays('2016-04-07', '2016-04-10');
-loadDays('2016-08-01', '2016-09-30');
+//loadDays('2016-04-01', '2016-05-31');
+loadDays('2016-06-01', '2016-07-31');
+//loadDays('2016-08-01', '2016-09-30');
 ?>
