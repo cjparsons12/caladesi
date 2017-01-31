@@ -67,7 +67,7 @@
     ";
 
     $sql_where = "
-    WHERE (DATE(game.game_date) BETWEEN ? AND ?)
+    WHERE (DATE(game.game_date) BETWEEN '$start_date' AND '$end_date')
     ";
   
     if($league != "ALL")
@@ -90,12 +90,14 @@
     $sql .= $sql_group . $sql_order;
 
     echo '<!--', $sql, '-->';
-    
-    $stmt = $db->prepare($sql);
-    $stmt->bind_param('ss', $start_date, $end_date);
+   
+    $result = mysqli_query($db,$sql);
 
-    $stmt->execute();
-    $result = $stmt->get_result();
+    //$stmt = $db->prepare($sql);
+    //$stmt->bind_param('ss', $start_date, $end_date);
+
+    //$stmt->execute();
+    //$result = $stmt->get_result();
     if(! $result)
     {
       echo 'abcdefg';
@@ -224,27 +226,9 @@
       <input type="submit" name="submit"/>
       </fieldset>
     </form>
+    <div id="data_table" align="left">
     <?php
       $result = getStats($start, $end, $league, $team, $pa);
-      /*
-      if (isset($_GET['submit']))
-      {
-        //$start = date("Y-m-d", strtotime($_GET['startdate']));
-        //$end = date("Y-m-d", strtotime($_GET['enddate']));
-        //$league = $_GET['league'];
-        //$team = $_GET['team'];
-        echo '<!--';
-        echo $start;
-        echo $end;
-        echo $league;
-        echo $team;
-        echo '-->';
-      }
-      else
-      {
-        $result = getStats('2016-08-01', '2016-08-02', 'ALL', 'ALL');
-      }
-      */
     ?>
     <table id="myTable" class="tablesorter">
       <colgroup>
@@ -290,7 +274,10 @@
               $bb_pct = number_format(round($row['bb_pct'] * 100, 1), 1) . '%';
               $so_pct = number_format(round($row['so_pct'] * 100, 1), 1) . '%';
               echo '<tr>';
-              echo '<td>', $row['lastname'], ', ', $row['firstname'], ' <a target="_blank" href="http://www.fangraphs.com/players.aspx?lastname=', $row['firstname'], ' ', $row['lastname'], '"> <img src="img/fangraphs.png"></a></td>';
+              echo '<td>', $row['lastname'], ', ', $row['firstname'];
+              echo ' <a target="_blank" href="http://www.fangraphs.com/players.aspx?lastname=', $row['firstname'], ' ', $row['lastname'], '"> <img src="img/fangraphs.png"></a>';
+              echo ' <a target="_blank" href="http://www.baseballprospectus.com/player_search.php?search_name=', $row['firstname'], ' ', $row['lastname'], '"> <img src="img/bp_20x20_clear_sub.png"></a>';
+              echo '</td>';
               echo '<td>', $row['position'], '</td>';
               echo '<td>', $row['class'], '</td>';
               echo '<td>', $row['league'], '</td>';
@@ -319,6 +306,7 @@
       echo '<b>No Results!</b>';
     }
     ?>
+    </div>
   </body>
 </html>
 
