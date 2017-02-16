@@ -2,22 +2,27 @@
   
   if (isset($_GET['submit']))
   {
+    $days = $_GET['days'];
     $start = date("Y-m-d", strtotime($_GET['startdate']));
     $end = date("Y-m-d", strtotime($_GET['enddate']));
     $league = $_GET['league'];
     $team = $_GET['team'];
     $pa = $_GET['pa'];
+    $page = $_GET['page'];
+    echo '<!--', http_build_query($_GET), "-->";
   }
   else
   {
+    $days = 'Custom';
     $start = '2016-04-01';
-    $end = '2016-04-13';
+    $end = '2016-09-30';
     $league = 'ALL';
     $team = 'ALL';
     $pa = 100;
+    $page = 1;
   }
 
-  function getStats($start_date, $end_date, $league, $team, $pa)
+  function getStats($start_date, $end_date, $league, $team, $pa, $page)
   {
     include("../resources/config.php");
 
@@ -77,17 +82,23 @@
       $sql_where .= " AND team.parent_team_abbrev = " . "'$team' ";
 
     $sql_group = "
-    GROUP BY player.id, league.id, team.id
+    GROUP BY player.id
     HAVING SUM(batter_game.plate_appearances) >= $pa
     ";
+    //GROUP BY player.id, league.id, team.id
 
     $sql_order = "
     ORDER BY age_diff ASC
     ";
 
+    $offset = ($page - 1) * 20;
+    $sql_limit = "
+    LIMIT 20 OFFSET $offset
+    ";
+
     $sql = $sql_select . $sql_join;
     $sql .= $sql_where;
-    $sql .= $sql_group . $sql_order;
+    $sql .= $sql_group . $sql_order . $sql_limit;
 
     echo '<!--', $sql, '-->';
    
@@ -101,7 +112,7 @@
     if(! $result)
     {
       echo 'abcdefg';
-      echo '<!--', mysqli_error($this->db), '-->';
+      echo '<!--', mysqli_error($db), '-->';
     }
     return $result;
     //$sql = $db->real_escape_string($sql);
@@ -155,6 +166,7 @@
         $("#myTable").tablesorter(); 
         $("#myTable").freezeHeader();
         //$('body').loadingIndicator();
+        enableCustom();
       } 
     );
     </script>
@@ -162,13 +174,46 @@
       function showLoading() {
         $('body').loadingIndicator();
       }
+      function enableCustom() {
+        //alert(jQuery("#myDaysSelect option:selected").val());
+        if(jQuery("#myDaysSelect option:selected").val() == 'Custom')
+        {
+          $("#datepicker_start").prop('disabled', false);
+          $("#datepicker_end").prop('disabled', false);
+        }
+        else
+        {
+          $("#datepicker_start").prop('disabled', true);
+          $("#datepicker_end").prop('disabled', true);
+        }
+      }
     </script>
   </head>
   <body>
     <h1>MiLB Splits</h1>
     <form id="myForm" action="" method="get" onsubmit="showLoading();">
       <fieldset data-role="controlgroup" data-type="horizontal">
-      <label>Dates:</label>
+      <label>Range:</label>
+      <select name="days" id="myDaysSelect" onchange="enableCustom();">
+        <?php
+          $ranges = [
+            "7" => "Last 7 Days",
+            "15" => "Last 15 Days",
+            "30" => "Last 30 Days",
+            "60" => "Last 60 Days",
+            "Custom" => "Custom Range"
+          ];
+          foreach($ranges as $key => $value)
+          {
+            //echo "<!--", $key, " = ", $value, " : ", $days, "-->";
+            echo "<option value=\"$key\"";
+            if($days == $key)
+              echo ' selected="selected"';
+            echo ">$value</option>";
+          }
+        ?>
+      </select>
+      <label>Custom Range:</label>
       <?php
         echo '<input type="text" id="datepicker_start" name="startdate" value="', date('m/d/Y', strtotime($start)), '"/>';
       ?>
@@ -176,6 +221,7 @@
       <?php
         echo '<input type="text" id="datepicker_end" name="enddate" value="', date('m/d/Y', strtotime($end)), '"/>';
       ?>
+      <br/>
       <label>League:</label>
       <select name="league">
         <option value="ALL">ALL</option>
@@ -223,12 +269,13 @@
         }
         ?>
       </select>
+      <input type="hidden" name="page" value="2"/>
       <input type="submit" name="submit"/>
       </fieldset>
     </form>
     <div id="data_table" align="left">
     <?php
-      $result = getStats($start, $end, $league, $team, $pa);
+      $result = getStats($start, $end, $league, $team, $pa, $page);
     ?>
     <table id="myTable" class="tablesorter">
       <colgroup>
@@ -275,8 +322,8 @@
               $so_pct = number_format(round($row['so_pct'] * 100, 1), 1) . '%';
               echo '<tr>';
               echo '<td>', $row['lastname'], ', ', $row['firstname'];
-              echo ' <a target="_blank" href="http://www.fangraphs.com/players.aspx?lastname=', $row['firstname'], ' ', $row['lastname'], '"> <img src="img/fangraphs.png"></a>';
-              echo ' <a target="_blank" href="http://www.baseballprospectus.com/player_search.php?search_name=', $row['firstname'], ' ', $row['lastname'], '"> <img src="img/bp_20x20_clear_sub.png"></a>';
+              echo '<a target="_blank" href="http://www.fangraphs.com/players.aspx?lastname=', $row['firstname'], ' ', $row['lastname'], '"><img src="https://www.google.com/s2/favicons?domain=http://www.fangraphs.com" height="12" width="12" border="0" style="margin:0 3px 0 6px"></a>';
+              echo '<a target="_blank" href="http://www.baseballprospectus.com/player_search.php?search_name=', $row['firstname'], ' ', $row['lastname'], '"><img src="https://www.google.com/s2/favicons?domain=http://www.baseballprospectus.com" height="12" width="12" border="0" style="margin:0 3px 0 3px"></a>';
               echo '</td>';
               echo '<td>', $row['position'], '</td>';
               echo '<td>', $row['class'], '</td>';
@@ -301,6 +348,16 @@
       </tbody>
     </table>
     <?php
+    $curPage = $_GET['page'];
+    if($curPage > 1)
+    {
+      $_GET['page'] = $curPage - 1;
+      echo '<a href="splits.php?'.http_build_query($_GET).'" onclick="showLoading();" >Previous</a>';
+    }
+
+    $_GET['page'] = $curPage + 1;
+    echo ' <a href="splits.php?'.http_build_query($_GET).'" onclick="showLoading();" >Next</a>';
+
     if(mysqli_num_rows($result) == 0)
     {
       echo '<b>No Results!</b>';

@@ -9,6 +9,7 @@ class Game
   public $date;
   public $game_type;
   public $status;
+  public $ind;
   public $away_team;
   public $home_team;
 
@@ -24,6 +25,7 @@ class Game
     $this->game_data_directory = $game['game_data_directory'];
     $this->game_type = $game['game_type'];
     $this->status = $game->status['status'];
+    $this->ind = $game->status['ind'];
     //echo $this->game_id, " ", $this->league, ' ', $this->game_data_directory, ' ', $this->status, PHP_EOL;
   }
 }
@@ -216,7 +218,8 @@ class Gameday2Data
     foreach($gamesXml->game as $gameXml)
     {
       $game = new Game($gameXml);
-      if($game->status == 'Final' && 
+      //echo substr($game->ind, 0, 1), PHP_EOL;
+      if(substr($game->ind, 0, 1) == 'F' && 
         $game->league != 'MEX' && 
         $game->game_type == 'R')
       {
@@ -242,7 +245,12 @@ class Gameday2Data
         //echo PHP_EOL;
 
         $game_id = $db->insertGame($game); 
-     
+        if(! $game_id)
+        {
+          echo "Could not enter game: $game->external_game_id", PHP_EOL;
+          continue;
+        }
+
         $boxscoreXmlFile = file_get_contents(self::getBoxscoreUrl($game));
         if(! $boxscoreXmlFile)
         {
@@ -274,6 +282,11 @@ class Gameday2Data
 
             // add to database
             $player_id = $db->insertPlayer($player);
+            if(!$player_id)
+            {
+              echo "Could not insert player: $player->external_player_id", PHP_EOL;
+              continue;
+            }
           }
           //echo "Player: ", $player_id, PHP_EOL;
 
@@ -357,7 +370,7 @@ function loadDays($start_date, $end_date)
   $db = new Database();
   $db->connect();
 
-  //$leagues = array("aaa", "aax", "afa", "afx", "asx", "rok");
+  //$classes = array("aaa");
   $classes = $db->getClasses();
 
   while (strtotime($start_date) <= strtotime($end_date))
@@ -378,7 +391,10 @@ function loadDays($start_date, $end_date)
 
 }
 
-//loadDays('2016-04-01', '2016-05-31');
-loadDays('2016-06-01', '2016-07-31');
-//loadDays('2016-08-01', '2016-09-30');
+loadDays('2016-04-07', '2016-04-30');
+loadDays('2016-05-01', '2016-05-31');
+loadDays('2016-06-01', '2016-06-30');
+loadDays('2016-07-01', '2016-07-31');
+loadDays('2016-08-01', '2016-08-31');
+loadDays('2016-09-01', '2016-09-30');
 ?>

@@ -10,7 +10,7 @@ class Database
     //define('DB_PASSWORD', 'SWF0rge!');
     //define('DB_NAME', 'splits');
     //$this->db = mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
-    $this->db = mysqli_connect('localhost','root','SWF0rge!','splits1');
+    $this->db = mysqli_connect('localhost','root','SWF0rge!','splits2');
   }
 
   public function insertGame($game)
@@ -27,7 +27,8 @@ class Database
     $result = mysqli_query($this->db,$sql);
     if(! $result )
     {
-      die('Could not enter game: ' . mysqli_error($this->db));
+      echo 'Could not enter game: ' . mysqli_error($this->db) . PHP_EOL;
+      return $result;
     }
     
     return mysqli_insert_id($this->db);
@@ -63,7 +64,8 @@ class Database
     $result = mysqli_query($this->db,$sql);
     if(! $result )
     {
-      die('Could not enter player: ' . mysqli_error($this->db));
+      echo 'Could not enter player: ' . mysqli_error($this->db) . PHP_EOL;
+      return $result;
     }
     
     return mysqli_insert_id($this->db);

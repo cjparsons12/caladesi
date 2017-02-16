@@ -2,10 +2,10 @@
  * Script
  */
 
-DROP DATABASE splits1;
+DROP DATABASE splits2;
 
-CREATE DATABASE splits1; 
-USE splits1;
+CREATE DATABASE splits2; 
+USE splits2;
 
 CREATE TABLE class (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +38,8 @@ CREATE TABLE game (
   away_team_id INT NOT NULL,
   home_team_id INT NOT NULL,
   FOREIGN KEY (away_team_id) REFERENCES team(id),
-  FOREIGN KEY (home_team_id) REFERENCES team(id)
+  FOREIGN KEY (home_team_id) REFERENCES team(id),
+  UNIQUE (game_id)
 );
 
 CREATE TABLE player (
@@ -51,7 +52,8 @@ CREATE TABLE player (
   weight INT, 
   bats CHAR(1), 
   throws CHAR(1), 
-  dateofbirth DATE 
+  dateofbirth DATE,
+  UNIQUE (player_id)
 );
 
 CREATE TABLE player_game (
@@ -94,12 +96,6 @@ CREATE TABLE pitcher_game (
   player_game_id INT NOT NULL,
   FOREIGN KEY (player_game_id) REFERENCES player_game(id)
 );
-
-#INSERT INTO game (id, game_id, league, game_data_directory) 
-#VALUES (NULL, "2016/07/19/lvgaaa-omaaaa-1", "PCL", "/components/game/aaa/year_2016/month_07/day_19/gid_2016_07_19_lvgaaa_omaaaa_1");
-
-#INSERT INTO batter_game_stats (id, game_id) 
-#VALUES (NULL, LAST_INSERT_ID());
 
 INSERT INTO class (id, code, name)
 VALUES(NULL, "aaa", "AAA");

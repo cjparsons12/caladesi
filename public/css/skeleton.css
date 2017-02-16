@@ -124,7 +124,7 @@ body {
   font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
   line-height: 1.6;
   font-weight: 400;
-  font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: /*"Raleway", "HelveticaNeue", */"Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #222; }
 
 
@@ -268,6 +268,8 @@ textarea:focus,
 select:focus {
   border: 1px solid #33C3F0;
   outline: 0; }
+input[type="text"]:disabled {
+  background: lightgray; }
 label,
 legend {
   display: block;
