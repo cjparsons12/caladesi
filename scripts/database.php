@@ -10,7 +10,7 @@ class Database
     //define('DB_PASSWORD', 'SWF0rge!');
     //define('DB_NAME', 'splits');
     //$this->db = mysqli_connect(DB_HOST,DB_USER,DB_PASSWORD,DB_NAME);
-    $this->db = mysqli_connect('localhost','root','SWF0rge!','splits2');
+    $this->db = mysqli_connect('localhost','root','superbowl51champs','splits2');
   }
 
   public function insertGame($game)

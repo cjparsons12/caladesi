@@ -391,10 +391,14 @@ function loadDays($start_date, $end_date)
 
 }
 
-loadDays('2016-04-07', '2016-04-30');
-loadDays('2016-05-01', '2016-05-31');
-loadDays('2016-06-01', '2016-06-30');
-loadDays('2016-07-01', '2016-07-31');
-loadDays('2016-08-01', '2016-08-31');
-loadDays('2016-09-01', '2016-09-30');
+//loadDays('2016-04-07', '2016-04-30');
+//loadDays('2016-05-01', '2016-05-31');
+//loadDays('2016-06-01', '2016-06-30');
+//loadDays('2016-07-01', '2016-07-31');
+//loadDays('2016-08-01', '2016-08-31');
+//loadDays('2016-09-01', '2016-09-30');
+//loadDays('2017-04-05', '2017-04-11');
+//$today = date('Y-m-d', strtotime('-1 day', strtotime('2017-04-03')));
+$today = date('Y-m-d', strtotime('-1 day'));
+loadDays($today, $today);
 ?>

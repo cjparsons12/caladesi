@@ -3,8 +3,13 @@
   if (isset($_GET['submit']))
   {
     $days = $_GET['days'];
-    $start = date("Y-m-d", strtotime($_GET['startdate']));
-    $end = date("Y-m-d", strtotime($_GET['enddate']));
+    if($days == 'Custom') {
+    	$start = date("Y-m-d", strtotime($_GET['startdate']));
+    	$end = date("Y-m-d", strtotime($_GET['enddate']));
+    } else {
+        $start = date("Y-m-d", strtotime('-'.$days.' days'));
+	$end = date("Y-m-d", strtotime('-1 day'));
+    }
     $league = $_GET['league'];
     $team = $_GET['team'];
     $pa = $_GET['pa'];
@@ -13,12 +18,12 @@
   }
   else
   {
-    $days = 'Custom';
-    $start = '2016-04-01';
-    $end = '2016-09-30';
+    $days = '15';
+    $start = '2017-04-06';
+    $end = date('Y-m-d', strtotime('-1 day'));
     $league = 'ALL';
     $team = 'ALL';
-    $pa = 100;
+    $pa =25;
     $page = 1;
   }
 
@@ -91,16 +96,11 @@
     ORDER BY age_diff ASC
     ";
 
-    $offset = ($page - 1) * 20;
-    $sql_limit = "
-    LIMIT 20 OFFSET $offset
-    ";
-
     $sql = $sql_select . $sql_join;
     $sql .= $sql_where;
-    $sql .= $sql_group . $sql_order . $sql_limit;
+    $sql .= $sql_group . $sql_order;
 
-    echo '<!--', $sql, '-->';
+    //echo '<!--', $sql, '-->';
    
     $result = mysqli_query($db,$sql);
 
@@ -257,7 +257,7 @@
       <label>Min PA:</label>
       <select name="pa">
         <?php
-        $pa_array = array(50, 100, 150, 200, 250, 300, 350, 400, 450, 500);
+        $pa_array = array(1, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500);
         foreach($pa_array as $pa_temp)
         {
           echo '<option';
@@ -348,16 +348,6 @@
       </tbody>
     </table>
     <?php
-    $curPage = $_GET['page'];
-    if($curPage > 1)
-    {
-      $_GET['page'] = $curPage - 1;
-      echo '<a href="splits.php?'.http_build_query($_GET).'" onclick="showLoading();" >Previous</a>';
-    }
-
-    $_GET['page'] = $curPage + 1;
-    echo ' <a href="splits.php?'.http_build_query($_GET).'" onclick="showLoading();" >Next</a>';
-
     if(mysqli_num_rows($result) == 0)
     {
       echo '<b>No Results!</b>';
